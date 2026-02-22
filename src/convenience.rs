@@ -144,4 +144,20 @@ mod tests {
         );
         assert!(result.is_ok());
     }
+
+    #[test]
+    fn test_error_display() {
+        assert_eq!(
+            PaperAgeError::Encryption("bad key".to_string()).to_string(),
+            "Encryption failed: bad key"
+        );
+        assert_eq!(
+            PaperAgeError::DocumentInit("missing font".to_string()).to_string(),
+            "Document initialization failed: missing font"
+        );
+        assert_eq!(
+            PaperAgeError::PdfCreation("QR too large".to_string()).to_string(),
+            "PDF creation failed: QR too large"
+        );
+    }
 }
