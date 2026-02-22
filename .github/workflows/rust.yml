@@ -2,9 +2,9 @@ name: Rust
 
 on:
   push:
-    branches: [ "main", "next" ]
+    branches: ["main", "next"]
   pull_request:
-    branches: [ "main", "next" ]
+    branches: ["main", "next"]
 
 permissions:
   checks: write
@@ -20,110 +20,84 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v6
-    - name: Set up Rust
-      run: |
-        rustup toolchain install stable --component clippy --profile minimal --no-self-update
-        rustup default stable
-    - name: Configure cache
-      uses: Swatinem/rust-cache@v2
-    - uses: giraffate/clippy-action@v1
-      with:
-        reporter: github-pr-review
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-      continue-on-error: true
+      - uses: actions/checkout@v6
+      - name: Set up Rust
+        run: |
+          rustup toolchain install stable --component clippy --profile minimal --no-self-update
+          rustup default stable
+      - name: Configure cache
+        uses: Swatinem/rust-cache@v2
+      - uses: giraffate/clippy-action@v1
+        with:
+          reporter: github-pr-review
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
 
   test:
     strategy:
       matrix:
-        os: [ "ubuntu-latest", "macos-14", "windows-latest" ]
+        os: ["ubuntu-latest", "macos-14", "windows-latest"]
 
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v6
-    - name: Create local bin directory
-      if: startsWith(matrix.os, 'ubuntu')
-      run: mkdir -p "${HOME}/.local/bin"
-    - name: Download markdown-test-report
-      if: startsWith(matrix.os, 'ubuntu')
-      uses: robinraju/release-downloader@v1.12
-      with:
-        repository: "ctron/markdown-test-report"
-        tag: "v0.3.8"
-        fileName: markdown-test-report-linux-amd64
-        out-file-path: tmp
-    - name: Install markdown-test-report
-      if: startsWith(matrix.os, 'ubuntu')
-      run: |
-        mv tmp/markdown-test-report-linux-amd64 "${HOME}/.local/bin/markdown-test-report"
-        chmod +x "${HOME}/.local/bin/markdown-test-report"
-    - name: Download grcov
-      if: startsWith(matrix.os, 'ubuntu')
-      uses: robinraju/release-downloader@v1.12
-      with:
-        repository: "mozilla/grcov"
-        latest: true
-        fileName: grcov-x86_64-unknown-linux-gnu.tar.bz2
-        out-file-path: tmp
-    - name: Install grcov
-      if: startsWith(matrix.os, 'ubuntu')
-      run: |
-        tar -xvf tmp/grcov-x86_64-unknown-linux-gnu.tar.bz2
-        mv grcov "${HOME}/.local/bin"
-        chmod +x "${HOME}/.local/bin/grcov"
-    - name: Set up Rust
-      run: |
-        rustup toolchain install nightly --component llvm-tools --profile minimal --no-self-update
-        rustup default nightly
-    - name: Configure cache
-      uses: Swatinem/rust-cache@v2
-    - name: Run tests (JSON output)
-      if: startsWith(matrix.os, 'ubuntu')
-      shell: bash
-      run: cargo test --verbose -- -Z unstable-options --report-time --format json | tee test-output.json
-      env:
-        CARGO_INCREMENTAL: 0
-        RUSTFLAGS: -Cinstrument-coverage
-        LLVM_PROFILE_FILE: cargo-test-%p-%m.profraw
-    - name: Run tests (normal output)
-      if: ${{ !startsWith(matrix.os, 'ubuntu') }}
-      run: cargo test
-    - name: Process code coverage with grcov
-      if: startsWith(matrix.os, 'ubuntu')
-      run: grcov . --binary-path ./target/debug/deps/ -s . -t cobertura --branch --ignore-not-existing --ignore '../*' --ignore "/*" -o target/cobertura.xml
-    - name: Upload coverage reports to Codecov
-      if: startsWith(matrix.os, 'ubuntu')
-      uses: codecov/codecov-action@v5
-      with:
-        files: target/cobertura.xml
-    - name: Job summary (tests)
-      if: ${{ always() }}
-      shell: bash
-      run: |
-        [ -f test-output.json ] && \
-          command -v markdown-test-report &> /dev/null && \
-          markdown-test-report --no-front-matter --output - >> $GITHUB_STEP_SUMMARY || true
-      continue-on-error: true
+      - uses: actions/checkout@v6
+      - name: Create local bin directory
+        if: startsWith(matrix.os, 'ubuntu')
+        run: mkdir -p "${HOME}/.local/bin"
+      - name: Download grcov
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: robinraju/release-downloader@v1.12
+        with:
+          repository: "mozilla/grcov"
+          latest: true
+          fileName: grcov-x86_64-unknown-linux-gnu.tar.bz2
+          out-file-path: tmp
+      - name: Install grcov
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          tar -xvf tmp/grcov-x86_64-unknown-linux-gnu.tar.bz2
+          mv grcov "${HOME}/.local/bin"
+          chmod +x "${HOME}/.local/bin/grcov"
+      - name: Set up Rust
+        run: |
+          rustup toolchain install stable --component llvm-tools --profile minimal --no-self-update
+          rustup default stable
+      - name: Configure cache
+        uses: Swatinem/rust-cache@v2
+      - name: Run tests
+        run: cargo test --verbose
+        env:
+          CARGO_INCREMENTAL: ${{ startsWith(matrix.os, 'ubuntu') && '0' || '1' }}
+          RUSTFLAGS: ${{ startsWith(matrix.os, 'ubuntu') && '-Cinstrument-coverage' || '' }}
+          LLVM_PROFILE_FILE: ${{ startsWith(matrix.os, 'ubuntu') && 'cargo-test-%p-%m.profraw' || '' }}
+      - name: Process code coverage with grcov
+        if: startsWith(matrix.os, 'ubuntu')
+        run: grcov . --binary-path ./target/debug/deps/ -s . -t cobertura --branch --ignore-not-existing --ignore '../*' --ignore "/*" -o target/cobertura.xml
+      - name: Upload coverage reports to Codecov
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: codecov/codecov-action@v5
+        with:
+          files: target/cobertura.xml
 
   build-binary:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v6
-    - name: Set up Rust
-      run: |
-        rustup toolchain install stable --profile minimal --no-self-update
-        rustup default stable
-    - name: Configure cache
-      uses: Swatinem/rust-cache@v2
-    - name: Compile binary
-      run: cargo build --release
-    - name: Store binary artifact
-      uses: actions/upload-artifact@v6
-      with:
-        name: paper-age-binary
-        path: target/release/paper-age
+      - uses: actions/checkout@v6
+      - name: Set up Rust
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+      - name: Configure cache
+        uses: Swatinem/rust-cache@v2
+      - name: Compile binary
+        run: cargo build --release
+      - name: Store binary artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: paper-age-binary
+          path: target/release/paper-age
 
   visual-snapshots:
     runs-on: ubuntu-latest
@@ -134,61 +108,61 @@ jobs:
       PAPERAGE_PASSPHRASE: supersecret
 
     steps:
-    - uses: actions/checkout@v6
-    - name: Setup Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: "3.2"
-    - name: Install latest PaperAge release
-      uses: robinraju/release-downloader@v1.12
-      with:
-        repository: "matiaskorhonen/paper-age"
-        latest: true
-        extract: true
-        fileName: paper-age-x86_64-unknown-linux-gnu.tar.gz
-        out-file-path: tmp
-    - name: Move the release binary to bin
-      run: mv tmp/paper-age bin/paper-age-release
-    - name: Install pdfium-cli
-      uses: robinraju/release-downloader@v1.12
-      with:
-        repository: "klippa-app/pdfium-cli"
-        tag: "v0.1.1"
-        fileName: pdfium-linux-x64
-        out-file-path: bin
-    - name: Make PDFium executable
-      run: chmod u+x bin/pdfium-linux-x64
-    - name: Download PaperAge binary for this branch
-      uses: actions/download-artifact@v7
-      with:
-        name: paper-age-binary
-    - name: Make the binary executable
-      run: chmod u+x paper-age
-    - name: Generate PDFs
-      run: |
-        mkdir -p visual-snapshots
-        echo "Hello World" | ./paper-age --title="A4 secret" --page-size=a4 --output=visual-snapshots/a4-current.pdf
-        echo "Hello World" | ./paper-age --title="Letter secret" --page-size=letter --output=visual-snapshots/letter-current.pdf
-        echo "Hello World" | ./bin/paper-age-release --title="A4 secret" --page-size=a4 --output=visual-snapshots/a4-release.pdf
-        echo "Hello World" | ./bin/paper-age-release --title="Letter secret" --page-size=letter --output=visual-snapshots/letter-release.pdf
-    - name: Convert the PDFs to PNGs
-      run: |
-        for f in visual-snapshots/*.pdf; do
-          echo "Converting $f to PNG"
-          ./bin/pdfium-linux-x64 render "$f" "${f%.*}.png" --combine-pages --dpi 300 --file-type png
-        done
-    - name: Generate image diffs
-      run: |
-        for f in visual-snapshots/*-current.png; do
-          echo "Comparing ${f/-current.png/-release.png} to $f"
-          npx --package=odiff-bin --yes -- odiff --parsable-stdout --threshold=0.5 "${f/-current.png/-release.png}" "$f" "${f/-current.png/-diff.png}"  || true
-        done
-    - name: Save PR number
-      run: |
-        mkdir -p ./pr
-        echo ${{ github.event.number }} > ./visual-snapshots/PR.txt
-    - name: Save snapshots
-      uses: actions/upload-artifact@v6
-      with:
-        name: visual-snapshots
-        path: visual-snapshots
+      - uses: actions/checkout@v6
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+      - name: Install latest PaperAge release
+        uses: robinraju/release-downloader@v1.12
+        with:
+          repository: "matiaskorhonen/paper-age"
+          latest: true
+          extract: true
+          fileName: paper-age-x86_64-unknown-linux-gnu.tar.gz
+          out-file-path: tmp
+      - name: Move the release binary to bin
+        run: mv tmp/paper-age bin/paper-age-release
+      - name: Install pdfium-cli
+        uses: robinraju/release-downloader@v1.12
+        with:
+          repository: "klippa-app/pdfium-cli"
+          tag: "v0.1.1"
+          fileName: pdfium-linux-x64
+          out-file-path: bin
+      - name: Make PDFium executable
+        run: chmod u+x bin/pdfium-linux-x64
+      - name: Download PaperAge binary for this branch
+        uses: actions/download-artifact@v7
+        with:
+          name: paper-age-binary
+      - name: Make the binary executable
+        run: chmod u+x paper-age
+      - name: Generate PDFs
+        run: |
+          mkdir -p visual-snapshots
+          echo "Hello World" | ./paper-age --title="A4 secret" --page-size=a4 --output=visual-snapshots/a4-current.pdf
+          echo "Hello World" | ./paper-age --title="Letter secret" --page-size=letter --output=visual-snapshots/letter-current.pdf
+          echo "Hello World" | ./bin/paper-age-release --title="A4 secret" --page-size=a4 --output=visual-snapshots/a4-release.pdf
+          echo "Hello World" | ./bin/paper-age-release --title="Letter secret" --page-size=letter --output=visual-snapshots/letter-release.pdf
+      - name: Convert the PDFs to PNGs
+        run: |
+          for f in visual-snapshots/*.pdf; do
+            echo "Converting $f to PNG"
+            ./bin/pdfium-linux-x64 render "$f" "${f%.*}.png" --combine-pages --dpi 300 --file-type png
+          done
+      - name: Generate image diffs
+        run: |
+          for f in visual-snapshots/*-current.png; do
+            echo "Comparing ${f/-current.png/-release.png} to $f"
+            npx --package=odiff-bin --yes -- odiff --parsable-stdout --threshold=0.5 "${f/-current.png/-release.png}" "$f" "${f/-current.png/-diff.png}"  || true
+          done
+      - name: Save PR number
+        run: |
+          mkdir -p ./pr
+          echo ${{ github.event.number }} > ./visual-snapshots/PR.txt
+      - name: Save snapshots
+        uses: actions/upload-artifact@v6
+        with:
+          name: visual-snapshots
+          path: visual-snapshots
