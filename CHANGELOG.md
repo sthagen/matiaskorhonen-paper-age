@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - ReleaseDate
 
 - Update the age crate to v0.11.2
+- Update printpdf to v0.9.1
+- Enable using PaperAge as a library
 - Minor dependency updates
 
 ## [1.3.4] - 2024-12-25
