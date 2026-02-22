@@ -102,7 +102,7 @@ paper-age [OPTIONS] [INPUT]
 
 | Argument | Description |
 |----------|-------------|
-| `[INPUT]` | The path to the file to read. Defaults to standard input. Max. ~1.9KB |
+| `[INPUT]` | The path to the file to read. Defaults to standard input. Max. ~1.9 KiB |
 
 ### **Options**
 
@@ -123,7 +123,7 @@ paper-age [OPTIONS] [INPUT]
 
 ## Notes/passphrase field
 
-The notes field below the QR code can be customised with the `--notes-label <TEXT>` and `--skip-notes-line` arguments. There's no enforced limit for the label length but eventually the text will overflow the page bounds.
+The notes field below the QR code can be customised with the `--notes-label <TEXT>` and `--skip-notes-line` arguments. There's no enforced limit for the label length, but eventually the text will overflow the page bounds.
 
 ### Examples
 
@@ -162,7 +162,7 @@ Run the latest from git locally, assuming you have already [installed Rust](http
 1. Pull this repo
 2. Run the tests: `cargo test`
 3. Get help: `cargo run -- -h`
-4. Encrypt from stdin: `echo "Hello World" | cargo run -- --title="secrets from stdin" --out="stdin.pdf"`
+4. Encrypt from stdin: `echo "Hello World" | cargo run -- --title="secrets from stdin" --output="stdin.pdf"`
 5. Run with maximum verbosity:  `echo "Hello World" | cargo run -- -vvvv`
 
 ### Releases
@@ -176,6 +176,10 @@ cargo release 1.2.3
 ```
 
 ⚠️ Append `--execute` to the command to actually execute the release.
+
+### PaperAge as a library
+
+Using PaperAge as a library is experimental and no guarantees are made about API stability.
 
 ## License & Credits
 
