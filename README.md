@@ -100,28 +100,26 @@ paper-age [OPTIONS] [INPUT]
 
 ### **Arguments**
 
-* `<INPUT>` — The path to the file to read. Defaults to standard input. Max. ~1.9KB.
+| Argument | Description |
+|----------|-------------|
+| `[INPUT]` | The path to the file to read. Defaults to standard input. Max. ~1.9KB |
 
 ### **Options**
 
-* `-t`, `--title <TITLE>` — Page title (max. 64 characters)
-
-  Default value: `PaperAge`
-* `-n`, `--notes-label <NOTES_LABEL>` — Notes label below the QR code (max. 32 characters)
-
-  Default value: `Passphrase:`
-* `--skip-notes-line` — Skip the notes placeholder line (e.g. Passphrase: ________)
-* `-o`, `--output <OUTPUT>` — Output file name. Use - for STDOUT.
-
-  Default value: `out.pdf`
-* `-s`, `--page-size <PAGE_SIZE>` — Paper size [default: `a4`] [possible values: `a4`, `letter`]
-* `-f`, `--force` — Overwrite the output file if it already exists
-* `-g`, `--grid` — Draw a grid pattern for debugging layout issues
-* `--fonts-license` — Print out the license for the embedded fonts
-* `-v`, `--verbose...` — More output per occurrence
-* `-q`, `--quiet...` — Less output per occurrence
-* `-h`, `--help` — Print help
-* `-V`, `--version` — Print version
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-t, --title <TITLE>` | Page title (max. 64 characters) | `PaperAge` |
+| `-n, --notes-label <NOTES_LABEL>` | Notes label below the QR code (max. 32 characters) | `Passphrase:` |
+| `--skip-notes-line` | Skip the notes placeholder line (e.g. Passphrase: ________) | |
+| `-o, --output <OUTPUT>` | Output file name. Use `-` for STDOUT | `out.pdf` |
+| `-s, --page-size <PAGE_SIZE>` | Paper size. Possible values: `a4`, `letter` | `a4` |
+| `-f, --force` | Overwrite the output file if it already exists | |
+| `-g, --grid` | Draw a grid pattern for debugging layout issues | |
+| `--fonts-license` | Print out the license for the embedded fonts | |
+| `-v, --verbose...` | Increase logging verbosity | |
+| `-q, --quiet...` | Decrease logging verbosity | |
+| `-h, --help` | Print help | |
+| `-V, --version` | Print version | |
 
 ## Notes/passphrase field
 
