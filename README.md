@@ -20,6 +20,10 @@ Easy and secure paper backups of (smallish) secrets using the Age format ([age-e
 * The passphrase **isn't** rendered on the PDF so that it can be printed on an untrusted printer (for example at work or the library)
 * You don't need PaperAge to recover from the backup: use any QR code scanner and [any implementation of Age](https://github.com/FiloSottile/awesome-age#implementations).
 
+### PaperAge Web
+
+An experimental WASM-based web app is [available](https://paper-age.matiaskorhonen.fi). Encryption and PDF generation happen locally in the browser. No data is sent to a server.
+
 ## Limitations
 
 * The maximum input size is about 1.9 KiB as QR codes cannot encode arbitrarily large payloads
