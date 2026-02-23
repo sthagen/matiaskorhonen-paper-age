@@ -10,7 +10,7 @@ use printpdf::{
 
 use crate::page::*;
 
-pub mod pdf;
+pub mod qrcode;
 
 /// PaperAge version
 pub const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
@@ -192,7 +192,7 @@ impl Document {
     pub fn insert_qr_code(&mut self, text: String) -> Result<(), Box<dyn std::error::Error>> {
         debug!("Inserting QR code");
 
-        let ops = pdf::qrcode(text, &self.page_size)?;
+        let ops = qrcode::render(text, &self.page_size)?;
         self.ops.extend(ops);
 
         Ok(())

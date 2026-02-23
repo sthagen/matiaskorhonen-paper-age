@@ -88,7 +88,7 @@ impl RenderCanvas for PdfCanvas {
 ///
 /// The error correction level is chosen automatically (H → Q → M → L),
 /// returning the highest level that fits the data.
-pub fn qrcode(text: String, page_size: &PageSize) -> Result<Vec<Op>, QrError> {
+pub fn render(text: String, page_size: &PageSize) -> Result<Vec<Op>, QrError> {
     // Error Correction Capability (approx.): H 30% / Q 25% / M 15% / L 7%
     let levels = [EcLevel::H, EcLevel::Q, EcLevel::M, EcLevel::L];
 
@@ -165,7 +165,7 @@ mod tests {
 
     #[test]
     fn test_pdf_qrcode_ok() {
-        let ops = qrcode(String::from("Some value"), &PageSize::A4).unwrap();
+        let ops = render(String::from("Some value"), &PageSize::A4).unwrap();
         // First op is SetFillColor, followed by at least one DrawRectangle.
         assert!(ops.len() > 1);
         assert!(matches!(ops[0], Op::SetFillColor { .. }));
@@ -176,7 +176,7 @@ mod tests {
 
     #[test]
     fn test_pdf_qrcode_rect_count() {
-        let ops = qrcode(String::from("test"), &PageSize::A4).unwrap();
+        let ops = render(String::from("test"), &PageSize::A4).unwrap();
         // Subtract the leading SetFillColor op.
         let rect_count = ops.len() - 1;
         // A minimal QR code (version 1 = 21×21 = 441 modules) will have at
@@ -193,14 +193,14 @@ mod tests {
 
     #[test]
     fn test_pdf_qrcode_letter() {
-        let ops = qrcode(String::from("Some value"), &PageSize::Letter).unwrap();
+        let ops = render(String::from("Some value"), &PageSize::Letter).unwrap();
         assert!(ops.len() > 1);
     }
 
     #[test]
     fn test_pdf_qrcode_origin_x_centered() {
         // For A4 the QR code should be horizontally centered.
-        let ops = qrcode(String::from("hi"), &PageSize::A4).unwrap();
+        let ops = render(String::from("hi"), &PageSize::A4).unwrap();
         let page_width_pt = A4_PAGE.width.into_pt().0;
         let desired_pt = PageSize::A4.qrcode_size().into_pt().0;
 
@@ -223,7 +223,7 @@ mod tests {
 
     #[test]
     fn test_pdf_qrcode_too_large() {
-        let result = qrcode(
+        let result = render(
             String::from(include_str!("../../tests/data/too_large.txt")),
             &PageSize::A4,
         );
