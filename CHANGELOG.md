@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [1.4.0] - 2026-02-23
+
 - Update the age crate to v0.11.2
 - Update printpdf to v0.9.1
 - Enable using PaperAge as a library
@@ -148,7 +150,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prevent accidental overwrites of the output file
 
 <!-- next-url -->
-[Unreleased]: https://github.com/matiaskorhonen/paper-age/compare/v1.3.4...HEAD
+[Unreleased]: https://github.com/matiaskorhonen/paper-age/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/matiaskorhonen/paper-age/compare/v1.3.4...v1.4.0
 [1.3.4]: https://github.com/matiaskorhonen/paper-age/compare/v1.3.3...v1.3.4
 [1.3.3]: https://github.com/matiaskorhonen/paper-age/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/matiaskorhonen/paper-age/compare/v1.3.1...v1.3.2
