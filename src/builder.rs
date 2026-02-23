@@ -10,7 +10,7 @@ use printpdf::{
 
 use crate::page::*;
 
-pub mod qrcode;
+pub mod qrcode_ops;
 
 /// PaperAge version
 pub const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
@@ -192,7 +192,7 @@ impl Document {
     pub fn insert_qr_code(&mut self, text: String) -> Result<(), Box<dyn std::error::Error>> {
         debug!("Inserting QR code");
 
-        let ops = qrcode::render(text, &self.page_size)?;
+        let ops = qrcode_ops::render(text, &self.page_size)?;
         self.ops.extend(ops);
 
         Ok(())
@@ -438,5 +438,5 @@ fn test_qrcode_too_large() {
     let result = document.insert_qr_code(String::from(include_str!("../tests/data/too_large.txt")));
 
     assert!(result.is_err());
-    assert!(result.unwrap_err().is::<::qrcode::types::QrError>());
+    assert!(result.unwrap_err().is::<qrcode::types::QrError>());
 }
