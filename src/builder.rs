@@ -438,5 +438,5 @@ fn test_qrcode_too_large() {
     let result = document.insert_qr_code(String::from(include_str!("../tests/data/too_large.txt")));
 
     assert!(result.is_err());
-    assert!(result.unwrap_err().is::<qrcode::types::QrError>());
+    assert!(result.unwrap_err().is::<::qrcode::types::QrError>());
 }
