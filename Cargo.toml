@@ -27,7 +27,7 @@ age = { version = "0.11.2", features = ["armor"] }
 clap = { version = "4.5", features = ["derive"] }
 clap-verbosity-flag = "3.0"
 exitcode = "1.1.2"
-printpdf = { version = "0.9.1", default-features = false }
+printpdf = { version = "0.9.1", features = ["text_layout"], default-features = false }
 qrcode = { version = "0.14.1", default-features = false }
 rpassword = "7"
 log = "0.4"

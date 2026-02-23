@@ -122,11 +122,11 @@ impl Document {
             - Mm::from(Pt(font_size));
 
         self.ops.push(Op::StartTextSection);
-        self.ops.push(Op::SetTextCursor {
-            pos: Point::new(margin, y),
-        });
         self.ops.push(Op::SetFillColor {
             col: Color::Rgb(Rgb::new(0.0, 0.0, 0.0, None)),
+        });
+        self.ops.push(Op::SetTextCursor {
+            pos: Point::new(margin, y),
         });
         self.ops.push(Op::SetFont {
             font: self.title_font.clone(),
@@ -161,6 +161,9 @@ impl Document {
         }
 
         self.ops.push(Op::StartTextSection);
+        self.ops.push(Op::SetFillColor {
+            col: Color::Rgb(Rgb::new(0.0, 0.0, 0.0, None)),
+        });
 
         self.ops.push(Op::SetTextCursor {
             pos: Point::new(
@@ -272,6 +275,9 @@ impl Document {
         let font_size = 13.0;
 
         self.ops.push(Op::StartTextSection);
+        self.ops.push(Op::SetFillColor {
+            col: Color::Rgb(Rgb::new(0.0, 0.0, 0.0, None)),
+        });
         self.ops.push(Op::SetTextCursor {
             pos: Point::new(self.page_size.qrcode_left_edge(), baseline),
         });
@@ -309,6 +315,9 @@ impl Document {
         debug!("Inserting footer");
 
         self.ops.push(Op::StartTextSection);
+        self.ops.push(Op::SetFillColor {
+            col: Color::Rgb(Rgb::new(0.0, 0.0, 0.0, None)),
+        });
         self.ops.push(Op::SetTextCursor {
             pos: Point::new(
                 self.page_size.dimensions().margin,
