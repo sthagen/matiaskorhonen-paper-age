@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [1.5.0] - 2026-02-24
+
 - Replace the SVG-based QR code rendering with a more optimised solution
 - Add a feature gate for the CLI
 - Prune the dependency tree
@@ -154,7 +156,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prevent accidental overwrites of the output file
 
 <!-- next-url -->
-[Unreleased]: https://github.com/matiaskorhonen/paper-age/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/matiaskorhonen/paper-age/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/matiaskorhonen/paper-age/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/matiaskorhonen/paper-age/compare/v1.3.4...v1.4.0
 [1.3.4]: https://github.com/matiaskorhonen/paper-age/compare/v1.3.3...v1.3.4
 [1.3.3]: https://github.com/matiaskorhonen/paper-age/compare/v1.3.2...v1.3.3
