@@ -5,13 +5,12 @@ use std::io::Write;
 use log::{debug, trace};
 use printpdf::{
     Color, DateTime, Line, LineDashPattern, LinePoint, Mm, Op, PaintMode, ParsedFont, PdfDocument,
-    PdfFontHandle, PdfPage, PdfSaveOptions, Point, Pt, Rect, Rgb, Svg, TextItem, WindingOrder,
-    XObjectTransform,
+    PdfFontHandle, PdfPage, PdfSaveOptions, Point, Pt, Rect, Rgb, TextItem, WindingOrder,
 };
 
 use crate::page::*;
 
-pub mod svg;
+pub mod qrcode_ops;
 
 /// PaperAge version
 pub const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
@@ -76,15 +75,16 @@ impl Document {
             Op::SetFillColor {
                 col: Color::Rgb(Rgb::new(1.0, 1.0, 1.0, None)),
             },
-            Op::DrawRectangle {
-                rectangle: Rect {
+            Op::DrawPolygon {
+                polygon: Rect {
                     x: Pt(0.0),
                     y: Pt(0.0),
                     width: dimensions.width.into_pt(),
                     height: dimensions.height.into_pt(),
                     mode: Some(PaintMode::Fill),
                     winding_order: Some(WindingOrder::NonZero),
-                },
+                }
+                .to_polygon(),
             },
             // Reset fill color to black for text and QR code
             Op::SetFillColor {
@@ -122,11 +122,11 @@ impl Document {
             - Mm::from(Pt(font_size));
 
         self.ops.push(Op::StartTextSection);
-        self.ops.push(Op::SetTextCursor {
-            pos: Point::new(margin, y),
-        });
         self.ops.push(Op::SetFillColor {
             col: Color::Rgb(Rgb::new(0.0, 0.0, 0.0, None)),
+        });
+        self.ops.push(Op::SetTextCursor {
+            pos: Point::new(margin, y),
         });
         self.ops.push(Op::SetFont {
             font: self.title_font.clone(),
@@ -161,6 +161,9 @@ impl Document {
         }
 
         self.ops.push(Op::StartTextSection);
+        self.ops.push(Op::SetFillColor {
+            col: Color::Rgb(Rgb::new(0.0, 0.0, 0.0, None)),
+        });
 
         self.ops.push(Op::SetTextCursor {
             pos: Point::new(
@@ -192,46 +195,8 @@ impl Document {
     pub fn insert_qr_code(&mut self, text: String) -> Result<(), Box<dyn std::error::Error>> {
         debug!("Inserting QR code");
 
-        let image = svg::qrcode(text)?;
-
-        let (svg_width_px, svg_height_px) =
-            parse_svg_pixel_dimensions(&image).ok_or("Failed to parse SVG dimensions")?;
-
-        let mut warnings = Vec::new();
-        let xobject = Svg::parse(&image, &mut warnings)
-            .map_err(|e| -> Box<dyn std::error::Error> { e.into() })?;
-        let xobj_id = self.doc.add_xobject(&xobject);
-
-        let dpi = 300.0;
-        let svg_height_pt = Pt(svg_height_px * 72.0 / dpi);
-        let svg_width_pt = Pt(svg_width_px * 72.0 / dpi);
-
-        let desired_qr_size = self.page_size.qrcode_size();
-        let initial_qr_size = Mm::from(svg_height_pt);
-        let qr_scale = desired_qr_size.0 / initial_qr_size.0;
-
-        let scale = qr_scale;
-        let code_width = Pt(svg_width_pt.0 * scale);
-        let code_height = Pt(svg_height_pt.0 * scale);
-
-        let page_width_pt = self.page_size.dimensions().width.into_pt();
-        let page_height_pt = self.page_size.dimensions().height.into_pt();
-        let margin_pt = self.page_size.dimensions().margin.into_pt();
-
-        let translate_x = Pt((page_width_pt.0 - code_width.0) / 2.0);
-        let translate_y = Pt(page_height_pt.0 - code_height.0 - margin_pt.0 * 2.0);
-
-        self.ops.push(Op::UseXobject {
-            id: xobj_id,
-            transform: XObjectTransform {
-                translate_x: Some(translate_x),
-                translate_y: Some(translate_y),
-                rotate: None,
-                scale_x: Some(scale),
-                scale_y: Some(scale),
-                dpi: Some(dpi),
-            },
-        });
+        let ops = qrcode_ops::render(text, &self.page_size)?;
+        self.ops.extend(ops);
 
         Ok(())
     }
@@ -310,6 +275,9 @@ impl Document {
         let font_size = 13.0;
 
         self.ops.push(Op::StartTextSection);
+        self.ops.push(Op::SetFillColor {
+            col: Color::Rgb(Rgb::new(0.0, 0.0, 0.0, None)),
+        });
         self.ops.push(Op::SetTextCursor {
             pos: Point::new(self.page_size.qrcode_left_edge(), baseline),
         });
@@ -347,6 +315,9 @@ impl Document {
         debug!("Inserting footer");
 
         self.ops.push(Op::StartTextSection);
+        self.ops.push(Op::SetFillColor {
+            col: Color::Rgb(Rgb::new(0.0, 0.0, 0.0, None)),
+        });
         self.ops.push(Op::SetTextCursor {
             pos: Point::new(
                 self.page_size.dimensions().margin,
@@ -433,19 +404,6 @@ impl Document {
 
         self.save_to_bytes()
     }
-}
-
-/// Parse width and height pixel values from an SVG string
-fn parse_svg_pixel_dimensions(svg: &str) -> Option<(f32, f32)> {
-    let width_start = svg.find("width=\"")? + 7;
-    let width_end = svg[width_start..].find('"')? + width_start;
-    let width: f32 = svg[width_start..width_end].parse().ok()?;
-
-    let height_start = svg.find("height=\"")? + 8;
-    let height_end = svg[height_start..].find('"')? + height_start;
-    let height: f32 = svg[height_start..height_end].parse().ok()?;
-
-    Some((width, height))
 }
 
 #[test]
