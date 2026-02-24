@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - ReleaseDate
 
 - Replace the SVG-based QR code rendering with a more optimised solution
+- Add a feature gate for the CLI
 - Prune the dependency tree
 
 ## [1.4.0] - 2026-02-23
