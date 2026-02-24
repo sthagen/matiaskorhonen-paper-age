@@ -75,7 +75,8 @@ impl Default for PageDimensions {
     }
 }
 
-#[derive(clap::ValueEnum, Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "cli", derive(clap::ValueEnum))]
 pub enum PageSize {
     A4,
     Letter,
