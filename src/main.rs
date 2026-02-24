@@ -13,13 +13,9 @@ use std::{
 
 use age::secrecy::{ExposeSecret, SecretString};
 use clap::Parser;
+use paper_age::{builder, cli, encryption};
 use qrcode::types::QrError;
 use rpassword::prompt_password;
-
-pub mod builder;
-pub mod cli;
-pub mod encryption;
-pub mod page;
 
 #[macro_use]
 extern crate log;
